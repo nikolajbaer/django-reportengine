@@ -6,11 +6,28 @@ class Report(object):
     verbose_name="Abstract Report"
     available_filters={} #{"a filter":(('A','a'),('B','b'))}
 
-    def __init__(self,request):
-        self.request=request
-
     # CONSIDER maybe an "update rows"?
     def get_rows(self,filters={},order_by=None,page=0,page_length=-1):
         """takes in parameters and pumps out an iterable of iterables for rows/cols, an list of tuples with (name/value) for the aggregates"""
         return [],(('total',0),)
+
+class QuerySetReport(Report):
+    available_filters = {} # TODO: make this pull from admin?
+    labels = None
+    queryset = None
+
+    def get_rows(self,filters={},order_by=None,page=0,page_length=None):
+        qs=self.queryset.filter(**filters)
+        if order_by:
+            qs=qs.order_by(order_by)
+        if page_length:
+           qs=qs[page*page_length:(page+1)*page_length]
+        return qs.values_list(*self.labels),(("total",qs.count()),)
+
+class ModelReport(QuerySetReport):
+    model = None
+
+    def __init__(self):
+        super(ModelReport,self).__init__() 
+        self.queryset=self.model.objects
 

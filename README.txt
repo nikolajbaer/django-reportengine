@@ -6,11 +6,11 @@ Also another goal is making it possible to expose reports in various formats (e.
 
 Short Term:
 TODO: add admin style filter controls
-TODO: build default QuerySetReport to inherit from
 TODO: build SQLReport that is based on instances configured in backend
 TODO: build CSV and XML exports
 TODO: add namespacing and/or categorization for registering reports
 TODO: add manage.py command that generates specified reports and puts them in a certain spot
+TODO: add calendar view for date ranged reports
 
 Long Term:
 TODO: build xml file for exporting permissions to Google SDC for secure google spreadsheet importing

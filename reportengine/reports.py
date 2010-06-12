@@ -1,8 +1,8 @@
-import simplereports
+import reportengine
 from django.contrib.auth.models import User
 
-# TODO don't name this simplereports
-class TestReport(simplereports.Report):  
+# TODO don't name this reportengine
+class TestReport(reportengine.Report):  
     verbose_name="My Report"
     available_filters = {"a filter":(('A','a'),('B','b'))}
     labels = ('username','is_active','email','first_name','last_name')
@@ -16,5 +16,5 @@ class TestReport(simplereports.Report):
         return qs.values_list(*self.labels)
 
  
-simplereports.register("test-report",TestReport)
+reportengine.register("test-report",TestReport)
 

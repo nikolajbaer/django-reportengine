@@ -37,6 +37,11 @@
         {% endfor %}
     </tr>
     {% endfor %}
+    {% for a in aggregates %}
+    <tr>
+        <td colspan="{{ report.labels|length|add:"-2" }}"></td>
+        <th>{{ a.0 }}</th><td>{{ a.1 }}</td>
+    {% endfor %}
     </tbody>
 </table>
 

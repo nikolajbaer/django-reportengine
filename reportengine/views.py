@@ -9,8 +9,25 @@ def report_list(request):
 
 def view_report(request, slug):
     report = reportengine.get_report(slug)(request)
-    rows = report.get_rows() # TODO add all the parameters
-    data = {'report': report, 'title':report.verbose_name,'rows':rows}
+    params=dict(request.REQUEST)
+
+    order_by=params.pop("order_by",None)
+
+    # TODO add pager
+    try:
+        page=int(params.pop("page",0))
+        page_length=int(params.pop("page_length",0))
+    except ValueError:
+        # ignore bogus page/page_length
+        page,page_length=0,0
+
+    # TODO put together filters here 
+    filters=params
+
+    rows,aggregates = report.get_rows(filters,order_by=order_by,page=page,page_length=page_length)
+    data = {'report': report, 'title':report.verbose_name,'rows':rows,"aggregates":aggregates}
+
     return render_to_response('reportengine/view.html', data, 
                               context_instance=RequestContext(request))
+
 

@@ -11,6 +11,6 @@ class Report(object):
 
     # CONSIDER maybe an "update rows"?
     def get_rows(self,filters={},order_by=None,page=0,page_length=-1):
-        """takes in parameters and pumps out an iterable"""
-        return []
+        """takes in parameters and pumps out an iterable of iterables for rows/cols, an list of tuples with (name/value) for the aggregates"""
+        return [],(('total',0),)
 

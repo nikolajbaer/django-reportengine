@@ -2,6 +2,8 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 import reportengine
 
+# TODO add calendar view for date-ranged reports
+
 # TODO Maybe use a class based view? how do i make it easy to build SQLReports?
 def report_list(request):
     r = reportengine.all_reports()

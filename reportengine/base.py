@@ -5,6 +5,9 @@
 class Report(object):
     verbose_name="Abstract Report"
     available_filters={} #{"a filter":(('A','a'),('B','b'))}
+    labels = None
+    daterange_filter = None # Set this to a filter variable to auto-range for calendar view
+    # CONSIDER for orm we would use datevar__lte=DATE1&datevar__gte=DATE2 .. but not for non orm views.. so they need to parse this? Maybe a set_date_range function. if that function exists then we go ahead and show it . .and rely on the set_date_range to setup the report? Need something reasonable here.
 
     # CONSIDER maybe an "update rows"?
     def get_rows(self,filters={},order_by=None,page=0,page_length=-1):

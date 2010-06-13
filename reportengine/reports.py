@@ -6,6 +6,7 @@ class UserReport(reportengine.ModelReport):
     available_filters = {"is_active":(('True','True'),('False','False'))}
     labels = ('username','is_active','email','first_name','last_name')
     model=User
+    per_page = 500
 
 class ActiveUserReport(reportengine.QuerySetReport):  
     verbose_name="Active User Report"
@@ -18,6 +19,7 @@ class AppsReport(reportengine.Report):
     verbose_name="Installed Apps"
     available_filters = {}
     labels = ('app_name',)
+    per_page = 0
 
     def get_rows(self,filters={},order_by=None):
         from django.conf import settings

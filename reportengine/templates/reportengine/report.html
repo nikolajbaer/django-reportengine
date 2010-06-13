@@ -48,7 +48,7 @@
         {% ifequal of output_format %}
         {{ of.verbose_name }} {% if not forloop.last %}|{% endif %}
         {% else %}
-        <a href="{% url reports-view-format report.slug of.slug %}?{{ urlparams }}">{{ of.verbose_name }}</a> {% if not forloop.last %}|{% endif %}
+        <a href="{% url reports-view-format report.namespace report.slug of.slug %}?{{ urlparams }}">{{ of.verbose_name }}</a> {% if not forloop.last %}|{% endif %}
         {% endifequal %}
         {% endfor %}
     </div>

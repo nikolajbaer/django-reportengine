@@ -1,22 +1,21 @@
 '''Duplicated from django-reporting by vitalik, but with my own twist -nb '''
 import imp
-from base import Report,ModelReport,QuerySetReport
+from base import Report,ModelReport,QuerySetReport,SQLReport
 
 # TODO  make this seperate from vitalik's registry methods
 _registry = {}
 
 def register(klass):
-    _registry[klass.slug] = klass
+    _registry[(klass.namespace,klass.slug)] = klass
 
-def get_report(slug):
+def get_report(namespace,slug):
     try:
-        return _registry[slug]
+        return _registry[(namespace,slug)]
     except KeyError:
         raise Exception("No such report '%s'" % slug)
 
 def all_reports():
     return _registry.items()
-
 
 def autodiscover():
     from django.conf import settings

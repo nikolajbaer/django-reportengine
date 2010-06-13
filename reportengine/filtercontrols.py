@@ -20,17 +20,23 @@ class FilterControl(object):
         return {self.field_name:forms.CharField(label=self.label or self.field_name,required=False)}
     
     # Pulled from django.contrib.admin.filterspecs
-    def register(cls, test, factory):
-        cls.filter_controls.append((test, factory))
+    def register(cls, test, factory, datatype):
+        cls.filter_controls.append((test, factory, datatype))
     register = classmethod(register)
 
-    def create(cls, f, field_name, label=None):
-        for test, factory in cls.filter_controls:
+    def create_from_modelfield(cls, f, field_name, label=None):
+        for test, factory, datatype in cls.filter_controls:
             if test(f):
                 return factory(field_name,label) 
-    create = classmethod(create)
+    create_from_modelfield = classmethod(create_from_modelfield)
 
-FilterControl.register(lambda m: isinstance(m,models.CharField),FilterControl)
+    def create_from_datatype(cls, datatype, field_name, label=None):
+        for test, factory, dt in cls.filter_controls:
+            if dt == datatype:
+                return factory(field_name,label) 
+    create_from_datatype = classmethod(create_from_datatype)
+
+FilterControl.register(lambda m: isinstance(m,models.CharField),FilterControl,"char")
 
 class DateTimeFilterControl(FilterControl):
     def get_fields(self):
@@ -39,14 +45,14 @@ class DateTimeFilterControl(FilterControl):
         end=forms.CharField(label=_("%s To")%ln,required=False,widget=forms.DateTimeInput())
         return {"%s__gte"%self.field_name:start,"%s__lte"%self.field_name:end}
 
-FilterControl.register(lambda m: isinstance(m,models.DateTimeField),DateTimeFilterControl)
+FilterControl.register(lambda m: isinstance(m,models.DateTimeField),DateTimeFilterControl,"datetime")
 
 class BooleanFilterControl(FilterControl):
     def get_fields(self):
         return {self.field_name:forms.CharField(label=self.label or self.field_name,
                 required=False,widget=forms.RadioSelect(choices=(('','All'),('1','True'),('0','False'))),initial='A')}
 
-FilterControl.register(lambda m: isinstance(m,models.BooleanField),BooleanFilterControl)
+FilterControl.register(lambda m: isinstance(m,models.BooleanField),BooleanFilterControl,"boolean")
 
 # TODO How do I register this one?
 class StartsWithFilterControl(FilterControl):

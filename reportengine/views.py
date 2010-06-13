@@ -3,8 +3,11 @@ from django.template.context import RequestContext
 from django.core.paginator import Paginator
 from django.contrib.admin.views.main import ALL_VAR,ORDER_VAR, PAGE_VAR
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
 import reportengine
 from urllib import urlencode
+import datetime
 
 # TODO add calendar view for date-ranged reports
 
@@ -19,8 +22,8 @@ def report_list(request):
 # to the appropriate date filter
 # TODO assign appropriate permissions. Some reports might need to be accessible via OAuth or some other mechanism
 @staff_member_required
-def view_report(request, slug, output=None):
-    report = reportengine.get_report(slug)()
+def view_report(request, namespace, slug, output=None):
+    report = reportengine.get_report(namespace,slug)()
     params=dict(request.REQUEST)
 
     order_by=params.pop(ORDER_VAR,None)
@@ -107,4 +110,19 @@ def view_report(request, slug, output=None):
 
     return outputformat.get_response(data,request)
 
+@staff_member_required
+def current_redirect(request, daterange, namespace, slug, output=None):
+    report=reportengine.get_report(namespace,slug) 
+    # TODO make month and year more intelligent per calendar
+    days={"day":1,"week":7,"month":30,"year":365}
+    params = dict(request.REQUEST)
+    if report.date_field:
+        d2=datetime.datetime.now()
+        d1=d2 - datetime.timedelta(days=days[daterange])
+        # TODO this only works with model fields, needs to be more generic
+        dates = {"%s__gte"%report.date_field:d1,"%s__lte"%report.date_field:d2}
+        params.update(dates)
+    if output:
+        return HttpResponseRedirect("%s?%s"%(reverse("reports-view-format",args=[namespace,slug,output]),urlencode(params)))
+    return HttpResponseRedirect("%s?%s"%(reverse("reports-view",args=[namespace,slug]),urlencode(params)))
 

@@ -29,6 +29,8 @@ class Report(object):
     can_show_all=True
     output_formats=[AdminOutputFormat(),CSVOutputFormat()]
     allow_unspecified_filters = False
+    date_field = None  # if specified will lookup for this date field. .this is currently limited to queryset based lookups
+
     # TODO add charts = [ {'name','type e.g. bar','data':(0,1,3) cols in table}]
     # then i can auto embed the charts at the top of the report based upon that data..
 
@@ -58,7 +60,7 @@ class QuerySetReport(Report):
             else:
                 mfi,mfm=get_lookup_field(self.queryset.model,self.queryset.model,f)
                 # TODO allow label as param 2
-                control = FilterControl.create(mfi,f)
+                control = FilterControl.create_from_modelfield(mfi,f)
             if control:
                 fields = control.get_fields()
                 form.fields.update(fields)
@@ -78,5 +80,40 @@ class ModelReport(QuerySetReport):
         super(ModelReport,self).__init__() 
         self.queryset=self.model.objects
 
-# TODO build SQLReport abstract class to inherit from
-# TODO build AnnotatedReport that deals with .annotate( functions in ORM
+class SQLReport(Report):
+    rows_sql=None # sql statement with named  parameters in python syntax (e.g. "%(age)s" )
+    aggregate_sql=None # sql statement that brings in aggregates. pulls from column name and value for first row only 
+    query_params=[] # list of tuples, (name,label,datatype) where datatype is a mapping to a registerd filtercontrol
+
+    def get_filter_form(self,request):
+        form=forms.Form(data=request.REQUEST) 
+        for q in self.query_params:
+            control = FilterControl.create_from_datatype(q[2],q[0],q[1])
+            fields = control.get_fields()
+            form.fields.update(fields)
+        form.full_clean()
+        return form
+
+    # CONSIDER not ideal in terms paging, would be better to fetch within a range.. 
+    def get_rows(self,filters={},order_by=None):
+        # TODO incorporate offset/limit somehow
+        from django.db import connection
+        cursor = connection.cursor()
+        if self.row_sql:
+            cursor.execute(self.row_sql%filters) 
+            rows=cursor.fetchall()
+        else: rows=[]
+
+        if self.aggregate_sql:
+            cursor.execute(self.aggregate_sql%filters)
+            result=cursor.fetchone() # only fetch first row
+        
+            agg=[]
+            for i in range(len(result)):
+                agg.append((cursor.description[i][0],result[i]))
+        else: agg=[]
+
+        return rows,agg
+    
+# TODO build AnnotatedReport that deals with .annotate functions in ORM
+

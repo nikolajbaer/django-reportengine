@@ -25,7 +25,7 @@ def view_report(request, slug, output=None):
     except ValueError:
         pass # ignore bogus page/per_page
 
-    # TODO put together filters here (use forms?)
+    # Filters are served as forms from the report
     filter_form=report.get_filter_form(request)
     if filter_form.fields:
         if filter_form.is_valid():
@@ -46,11 +46,21 @@ def view_report(request, slug, output=None):
         if filters[k] == '':
             del filters[k]
 
+    # pull the rows and aggregates
     rows,aggregates = report.get_rows(filters,order_by=order_by)
+
+    # Determine output format, as it can squash paging if it wants
+    outputformat=None
+    if output:
+        for of in report.output_formats:
+            if of.slug == output:
+                outputformat=of
+    if not outputformat:
+        outputformat = report.output_formats[0] 
 
     paginator=None
     cl=None
-    if per_page:
+    if per_page and not outputformat.no_paging:
         paginator=Paginator(rows,per_page)
         p=paginator.page(page+1)
         rows=p.object_list
@@ -88,13 +98,6 @@ def view_report(request, slug, output=None):
             "page":page,
             "urlparams":urlencode(request.REQUEST)}
 
-    outputformat=None
-    if output:
-        for of in report.output_formats:
-            if of.slug == output:
-                outputformat=of
-    if not outputformat:
-        outputformat = report.output_formats[0] 
     return outputformat.get_response(data,request)
 
 

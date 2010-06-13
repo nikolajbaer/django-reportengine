@@ -6,25 +6,26 @@ class Report(object):
     verbose_name="Abstract Report"
     available_filters={} #{"a filter":(('A','a'),('B','b'))}
     labels = None
-    daterange_filter = None # Set this to a filter variable to auto-range for calendar view
-    # CONSIDER for orm we would use datevar__lte=DATE1&datevar__gte=DATE2 .. but not for non orm views.. so they need to parse this? Maybe a set_date_range function. if that function exists then we go ahead and show it . .and rely on the set_date_range to setup the report? Need something reasonable here.
+    per_page=100
+    can_show_all=True
+
+    def get_filter_forms(self,request):
+        return []
 
     # CONSIDER maybe an "update rows"?
-    def get_rows(self,filters={},order_by=None,page=0,page_length=-1):
+    # CONSIDER should paging be dealt with here to more intelligently handle aggregates?
+    def get_rows(self,filters={},order_by=None):
         """takes in parameters and pumps out an iterable of iterables for rows/cols, an list of tuples with (name/value) for the aggregates"""
         return [],(('total',0),)
 
 class QuerySetReport(Report):
-    available_filters = {} # TODO: make this pull from admin?
     labels = None
     queryset = None
-
-    def get_rows(self,filters={},order_by=None,page=0,page_length=None):
+ 
+    def get_rows(self,filters={},order_by=None):
         qs=self.queryset.filter(**filters)
         if order_by:
             qs=qs.order_by(order_by)
-        if page_length:
-           qs=qs[page*page_length:(page+1)*page_length]
         return qs.values_list(*self.labels),(("total",qs.count()),)
 
 class ModelReport(QuerySetReport):

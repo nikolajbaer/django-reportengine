@@ -10,6 +10,7 @@ class UserReport(reportengine.ModelReport):
 class ActiveUserReport(reportengine.QuerySetReport):  
     verbose_name="Active User Report"
     available_filters = {}
+    per_page=10
     labels = ('username','email','first_name','last_name')
     queryset=User.objects.filter(is_active=True)
 
@@ -18,15 +19,16 @@ class AppsReport(reportengine.Report):
     available_filters = {}
     labels = ('app_name',)
 
-    def get_rows(self,filters={},order_by=None,page=0,page_length=None):
+    def get_rows(self,filters={},order_by=None):
         from django.conf import settings
+        # maybe show off by pulling active content type models for each app?
+        # from django.contrib.contenttypes.models import ContentType
         apps=[[a] for a in settings.INSTALLED_APPS]
+
         if order_by:
             # add sorting based on label?
             apps.sort() 
         total=len(apps)
-        if page_length:
-           apps=apps[page*page_length:(page+1)*page_length]
         return apps,(("total",total),)
  
 reportengine.register("user-report",UserReport)

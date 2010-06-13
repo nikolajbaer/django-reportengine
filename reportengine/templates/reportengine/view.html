@@ -16,10 +16,19 @@
 {% endblock %}
 
 
-
 {% block content %}
   <div id="content-main">
     {% block object-tools %}{% endblock %}
+
+    {% block filters %}
+    <div id="filters">
+        <form>
+        {% for f in filters %}
+        <div class="filter">{{ f }}</div>
+        {% endfor %} 
+        </form>
+    </div>
+    {% endblock %}
 
  <table>
     <thead>
@@ -44,6 +53,10 @@
     {% endfor %}
     </tbody>
 </table>
+
+{% if cl %}
+<div>{% pagination cl %}</div>
+{% endif %}
 
 </div>
 {% endblock %}

@@ -15,6 +15,8 @@ def report_list(request):
     return render_to_response('reportengine/list.html', {'reports': r}, 
                               context_instance=RequestContext(request))
 
+# TODO build date_field redirects.. so view is at /current/<day|week|month|year>/<slug>/<format>/ and redirects
+# to the appropriate date filter
 # TODO assign appropriate permissions. Some reports might need to be accessible via OAuth or some other mechanism
 @staff_member_required
 def view_report(request, slug, output=None):

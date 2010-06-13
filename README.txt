@@ -20,8 +20,7 @@ TODO: figure out per page aggregates (right now that is not accessible in get_ro
 TODO: maybe allow fields in queryset report to be callable on the model?
 TODO: look into group bys, try an example
 TODO: create an intuitive filter system for non-queryset based reports
-TODO: add a "today","this week","this month" hot link to the DateTimeFilterControl, maybe let it parse "today" as an ongoing 
-today field.. so like ?date_joined__lte=today or something
+TODO: make today type redirects and add date_field specifier
 TODO: add fine-grained permissions per report
 
 === Long Term ===

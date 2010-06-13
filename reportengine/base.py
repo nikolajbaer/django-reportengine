@@ -29,6 +29,8 @@ class Report(object):
     can_show_all=True
     output_formats=[AdminOutputFormat(),CSVOutputFormat()]
     allow_unspecified_filters = False
+    # TODO add charts = [ {'name','type e.g. bar','data':(0,1,3) cols in table}]
+    # then i can auto embed the charts at the top of the report based upon that data..
 
     def get_filter_form(self,request):
         return forms.Form(request.REQUEST) 
@@ -40,6 +42,7 @@ class Report(object):
         return [],(('total',0),)
 
 class QuerySetReport(Report):
+    # TODO make labels more addressable. now fixed to fields in model. what happens with relations?
     labels = None
     queryset = None
     list_filter = []
@@ -75,4 +78,5 @@ class ModelReport(QuerySetReport):
         super(ModelReport,self).__init__() 
         self.queryset=self.model.objects
 
-
+# TODO build SQLReport abstract class to inherit from
+# TODO build AnnotatedReport that deals with .annotate( functions in ORM

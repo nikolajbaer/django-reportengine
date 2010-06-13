@@ -1,6 +1,7 @@
 """Reports base class. This reports module trys to provide an ORM agnostic reports engine that will allow nice reports to be generated and exportable in a variety of formats. It seeks to be easy to use with querysets, raw SQL, or pure python. An additional goal is to have the reports be managed by model instances as well (e.g. a generic SQL based report that can be done in the backend).
 
 """
+from django import forms 
 
 class Report(object):
     verbose_name="Abstract Report"
@@ -9,8 +10,8 @@ class Report(object):
     per_page=100
     can_show_all=True
 
-    def get_filter_forms(self,request):
-        return []
+    def get_filter_form(self,request):
+        return forms.Form(request.REQUEST) 
 
     # CONSIDER maybe an "update rows"?
     # CONSIDER should paging be dealt with here to more intelligently handle aggregates?
@@ -21,6 +22,17 @@ class Report(object):
 class QuerySetReport(Report):
     labels = None
     queryset = None
+    list_filter = []
+
+    def get_filter_form(self,request):
+        # TODO iterate through list filter and create appropriate widget and prefill from request
+        form = forms.Form(data=request.REQUEST)
+        for f in self.list_filter:
+            # TODO grab model field and parse date, number, relation and choices appropriately
+            fi = forms.CharField(label=f,required=False)
+            form.fields[f]=fi
+        form.full_clean()
+        return form
  
     def get_rows(self,filters={},order_by=None):
         qs=self.queryset.filter(**filters)

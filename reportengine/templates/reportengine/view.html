@@ -21,13 +21,14 @@
     {% block object-tools %}{% endblock %}
 
     {% block filters %}
+    {% if filter_form.fields %}
     <div id="filters">
         <form>
-        {% for f in filters %}
-        <div class="filter">{{ f }}</div>
-        {% endfor %} 
+        {{ filter_form }}
+        <input type="submit" value="Apply" />
         </form>
     </div>
+    {% endif %}
     {% endblock %}
 
  <table>

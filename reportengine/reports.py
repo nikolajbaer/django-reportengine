@@ -3,21 +3,19 @@ from django.contrib.auth.models import User
 
 class UserReport(reportengine.ModelReport):  
     verbose_name="User Report"
-    available_filters = {"is_active":(('True','True'),('False','False'))}
     labels = ('username','is_active','email','first_name','last_name')
+    list_filter=['is_active']
     model=User
     per_page = 500
 
 class ActiveUserReport(reportengine.QuerySetReport):  
     verbose_name="Active User Report"
-    available_filters = {}
     per_page=10
     labels = ('username','email','first_name','last_name')
     queryset=User.objects.filter(is_active=True)
 
 class AppsReport(reportengine.Report):  
     verbose_name="Installed Apps"
-    available_filters = {}
     labels = ('app_name',)
     per_page = 0
 

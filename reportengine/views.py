@@ -59,9 +59,12 @@ def view_report(request, slug):
         cl_params=order_by and dict(params,order_by=order_by) or params
         cl=MiniChangeList(paginator,page,per_page,cl_params)
 
+    filter_form=report.get_filter_form(request)
+
     data = {'report': report, 
             'title':report.verbose_name,
             'rows':rows,
+            'filter_form':filter_form,
             "aggregates":aggregates,
             "paginator":paginator,
             "cl":cl,

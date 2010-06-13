@@ -1,12 +1,13 @@
 import reportengine
 from django.contrib.auth.models import User
+from reportengine.filtercontrols import StartsWithFilterControl
 
 class UserReport(reportengine.ModelReport):  
     """An example of a model report"""
     verbose_name = "User Report"
     description = "Listing of all users in the system"
-    labels = ('username','is_active','email','first_name','last_name')
-    list_filter=['is_active','date_joined','groups']
+    labels = ('username','is_active','email','first_name','last_name','date_joined')
+    list_filter=['is_active','date_joined',StartsWithFilterControl('username'),'groups']
     model=User
     per_page = 500
 
@@ -14,7 +15,7 @@ class ActiveUserReport(reportengine.QuerySetReport):
     """ An example of a queryset report. """
     verbose_name="Active User Report"
     per_page=10
-    labels = ('username','email','first_name','last_name')
+    labels = ('username','email','first_name','last_name','date_joined')
     queryset=User.objects.filter(is_active=True)
 
 class AppsReport(reportengine.Report):  

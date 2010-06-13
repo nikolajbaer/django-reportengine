@@ -29,6 +29,9 @@ def view_report(request, slug):
     filter_form=report.get_filter_form(request)
     if filter_form.is_valid():
         filters=filter_form.cleaned_data
+    else:
+        # If invalid filters, blank out filters so form error can propagate up
+        filters={}
 
     # Remove blank filters
     for k in filters.keys():

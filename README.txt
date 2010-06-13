@@ -11,6 +11,7 @@ TODO: build CSV and XML exports
 TODO: add namespacing and/or categorization for registering reports
 TODO: add manage.py command that generates specified reports and puts them in a certain spot
 TODO: add calendar view for date ranged reports
+TODO: add table row sorting
 
 Long Term:
 TODO: build xml file for exporting permissions to Google SDC for secure google spreadsheet importing

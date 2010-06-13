@@ -32,7 +32,9 @@
     <h3>Filter</h3>
     <div id="filters">
         <form>
-        {{ filter_form }}
+        <table>
+        {{ filter_form.as_table }}
+        </table>
         <input type="submit" value="Apply" />
         </form>
     </div>
@@ -40,7 +42,7 @@
     {% endblock %}
 
     {% block alternate-formats %}
-    <h3>Alterante Formats</h3>
+    <h3>Alternate Formats</h3>
     <div>
         <i>Not Yet Implemented</i> 
     </div>

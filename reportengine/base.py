@@ -5,6 +5,7 @@ from django import forms
 from django.db import models
 from django.db.models.fields.related import RelatedField
 from django.db.models.fields import FieldDoesNotExist
+from filtercontrols import *
 
 # Pulled from vitalik's Django-reporting
 def get_model_field(model, name):
@@ -46,23 +47,16 @@ class QuerySetReport(Report):
         # TODO iterate through list filter and create appropriate widget and prefill from request
         form = forms.Form(data=request.REQUEST)
         for f in self.list_filter:
-            # TODO grab model field and parse date, number, relation and choices appropriately
-            # TODO also want to respect subdividing field relations, e.g. user__group__in type things
-            # CONSIDER using a pattern like filterspecs here
-            #mfi=self.queryset.model._meta.get_field(f)
-            mfi,mfm=get_lookup_field(self.queryset.model,self.queryset.model,f)
-
-            if isinstance(mfi, models.DateField):
-                # TODO this is just a raw date== kind of thing.. but we really want to shoe-horn in a range
-                # widget for a date/time field..
-                fi = forms.CharField(label=f,required=False,widget=forms.DateTimeInput())
-            elif isinstance(mfi, models.BooleanField):
-                # TODO this is an issue because unchecked means that this value is not there..
-                # perhaps make it a radio with "All" "True" "False".. but how will that work.. 
-                fi = forms.BooleanField(label=f,required=False)
+            # Allow specification of custom filter control, or specify field name (and label?)
+            if isinstance(f,FilterControl):
+                control=f
             else:
-                fi = forms.CharField(label=f,required=False)
-            form.fields[f]=fi
+                mfi,mfm=get_lookup_field(self.queryset.model,self.queryset.model,f)
+                # TODO allow label as param 2
+                control = FilterControl.create(mfi,f)
+            if control:
+                fields = control.get_fields()
+                form.fields.update(fields)
         form.full_clean()
         return form
  

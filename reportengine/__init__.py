@@ -5,8 +5,8 @@ from base import Report,ModelReport,QuerySetReport
 # TODO  make this seperate from vitalik's registry methods
 _registry = {}
 
-def register(slug, klass):
-    _registry[slug] = klass
+def register(klass):
+    _registry[klass.slug] = klass
 
 def get_report(slug):
     try:

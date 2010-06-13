@@ -13,7 +13,7 @@ def report_list(request):
     return render_to_response('reportengine/list.html', {'reports': r}, 
                               context_instance=RequestContext(request))
 
-def view_report(request, slug):
+def view_report(request, slug, output=None):
     report = reportengine.get_report(slug)()
     params=dict(request.REQUEST)
 
@@ -27,11 +27,19 @@ def view_report(request, slug):
 
     # TODO put together filters here (use forms?)
     filter_form=report.get_filter_form(request)
-    if filter_form.is_valid():
-        filters=filter_form.cleaned_data
+    if filter_form.fields:
+        if filter_form.is_valid():
+            filters=filter_form.cleaned_data
+        else:
+            # If invalid filters, blank out filters so form error can propagate up
+            filters={}
     else:
-        # If invalid filters, blank out filters so form error can propagate up
-        filters={}
+        # If no filter form fields are present, we just allow params to go through
+        # CONSIDER making this allowance explicit? e.g. report.allow_unspecified_filters
+        if report.allow_unspecified_filters:
+            filters=dict(request.REQUEST)
+        else:
+            filters={}
 
     # Remove blank filters
     for k in filters.keys():
@@ -77,9 +85,16 @@ def view_report(request, slug):
             "aggregates":aggregates,
             "paginator":paginator,
             "cl":cl,
-            "page":page}
+            "page":page,
+            "urlparams":urlencode(request.REQUEST)}
 
-    return render_to_response('reportengine/view.html', data, 
-                              context_instance=RequestContext(request))
+    outputformat=None
+    if output:
+        for of in report.output_formats:
+            if of.slug == output:
+                outputformat=of
+    if not outputformat:
+        outputformat = report.output_formats[0] 
+    return outputformat.get_response(data,request)
 
 

@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models.fields.related import RelatedField
 from django.db.models.fields import FieldDoesNotExist
 from filtercontrols import *
+from outputformats import *
 
 # Pulled from vitalik's Django-reporting
 def get_model_field(model, name):
@@ -23,10 +24,11 @@ def get_lookup_field(model, original, lookup):
 
 class Report(object):
     verbose_name="Abstract Report"
-    available_filters={} #{"a filter":(('A','a'),('B','b'))}
     labels = None
     per_page=100
     can_show_all=True
+    output_formats=[AdminOutputFormat(),CSVOutputFormat()]
+    allow_unspecified_filters = False
 
     def get_filter_form(self,request):
         return forms.Form(request.REQUEST) 
@@ -72,4 +74,5 @@ class ModelReport(QuerySetReport):
     def __init__(self):
         super(ModelReport,self).__init__() 
         self.queryset=self.model.objects
+
 

@@ -1,6 +1,8 @@
 = ReportEngine (for Django 1.1+) =
 by Nikolaj Baer for Web Cube CMS [http://www.webcubecms.com]
 
+Version: Very Alpha
+
 == Overview ==
 
 Inspired by vitalik's django-reporting [http://code.google.com/p/django-reporting], ReportEngine seeks to make something less tied to the ORM to allow for those many instances where complex reports require some direct sql, or pure python code.

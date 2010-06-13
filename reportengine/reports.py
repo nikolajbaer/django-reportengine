@@ -2,20 +2,23 @@ import reportengine
 from django.contrib.auth.models import User
 
 class UserReport(reportengine.ModelReport):  
+    """An example of a model report"""
     verbose_name = "User Report"
     description = "Listing of all users in the system"
     labels = ('username','is_active','email','first_name','last_name')
-    list_filter=['is_active']
+    list_filter=['is_active','date_joined','groups']
     model=User
     per_page = 500
 
 class ActiveUserReport(reportengine.QuerySetReport):  
+    """ An example of a queryset report. """
     verbose_name="Active User Report"
     per_page=10
     labels = ('username','email','first_name','last_name')
     queryset=User.objects.filter(is_active=True)
 
 class AppsReport(reportengine.Report):  
+    """An Example report that is pure python, just returning a list"""
     verbose_name="Installed Apps"
     labels = ('app_name',)
     per_page = 0
@@ -24,7 +27,7 @@ class AppsReport(reportengine.Report):
         from django.conf import settings
         # maybe show off by pulling active content type models for each app?
         # from django.contrib.contenttypes.models import ContentType
-        apps=[[a] for a in settings.INSTALLED_APPS]
+        apps=[[a,] for a in settings.INSTALLED_APPS]
 
         if order_by:
             # add sorting based on label?

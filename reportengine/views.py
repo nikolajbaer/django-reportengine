@@ -26,7 +26,14 @@ def view_report(request, slug):
         pass # ignore bogus page/per_page
 
     # TODO put together filters here (use forms?)
-    filters=params
+    filter_form=report.get_filter_form(request)
+    if filter_form.is_valid():
+        filters=filter_form.cleaned_data
+
+    # Remove blank filters
+    for k in filters.keys():
+        if filters[k] == '':
+            del filters[k]
 
     rows,aggregates = report.get_rows(filters,order_by=order_by)
 
@@ -59,7 +66,6 @@ def view_report(request, slug):
         cl_params=order_by and dict(params,order_by=order_by) or params
         cl=MiniChangeList(paginator,page,per_page,cl_params)
 
-    filter_form=report.get_filter_form(request)
 
     data = {'report': report, 
             'title':report.verbose_name,

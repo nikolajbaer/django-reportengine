@@ -12,7 +12,6 @@ It allows you to add new reports that either feed directly from a model, do thei
 === Short Term ===
 
 TODO: build SQLReport that is based on instances configured in backend
-TODO: add namespacing and/or categorization for registering reports
 TODO: add manage.py command that generates specified reports and puts them in a certain spot
 TODO: add calendar view for date ranged reports
 TODO: add table row sorting
@@ -20,7 +19,7 @@ TODO: figure out per page aggregates (right now that is not accessible in get_ro
 TODO: maybe allow fields in queryset report to be callable on the model?
 TODO: look into group bys, try an example
 TODO: create an intuitive filter system for non-queryset based reports
-TODO: make today type redirects and add date_field specifier
+TODO: make today type redirects and add date_field specifier (almost done)
 TODO: add fine-grained permissions per report
 
 === Long Term ===

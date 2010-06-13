@@ -29,7 +29,9 @@
       
       <div id="changelist"
 			{% for slug, report in reports %}
-				<a href="{% url reports-view slug.0 slug.1 %}">{{report.verbose_name}}</a><br>
+                {% ifchanged slug.0 %}<h3>{{ slug.0|title }}</h3>{% endifchanged %}
+				<a href="{% url reports-view slug.0 slug.1 %}">{{report.verbose_name}}</a>
+                <br/>
 			{% endfor %}
 	  </div>
     </div>

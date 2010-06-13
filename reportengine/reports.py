@@ -7,7 +7,7 @@ class UserReport(reportengine.ModelReport):
     """An example of a model report"""
     verbose_name = "User Report"
     slug = "user-report"
-    namespace = "System"
+    namespace = "system"
     description = "Listing of all users in the system"
     labels = ('username','is_active','email','first_name','last_name','date_joined')
     list_filter=['is_active','date_joined',StartsWithFilterControl('username'),'groups']
@@ -21,7 +21,7 @@ class ActiveUserReport(reportengine.QuerySetReport):
     """ An example of a queryset report. """
     verbose_name="Active User Report"
     slug = "active-user-report"
-    namespace = "System"
+    namespace = "system"
     per_page=10
     labels = ('username','email','first_name','last_name','date_joined')
     queryset=User.objects.filter(is_active=True)
@@ -31,7 +31,7 @@ reportengine.register(ActiveUserReport)
 class AppsReport(reportengine.Report):  
     """An Example report that is pure python, just returning a list"""
     verbose_name="Installed Apps"
-    namespace = "System"
+    namespace = "system"
     slug = "apps-report"
     labels = ('app_name',)
     per_page = 0
@@ -66,7 +66,7 @@ class AdminActivityReport(reportengine.SQLReport):
             )"""
     # TODO adding parameters to the sql report is.. hard.
     #query_params = [("username","Username","char")]
-    namespace="Administration"
+    namespace="administration"
     labels = ('username','user id','actions','oldest','latest')
     verbose_name="Admin Activity Report"
     slug="admin-activity"

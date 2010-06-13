@@ -44,7 +44,7 @@ FilterControl.register(lambda m: isinstance(m,models.DateTimeField),DateTimeFilt
 class BooleanFilterControl(FilterControl):
     def get_fields(self):
         return {self.field_name:forms.CharField(label=self.label or self.field_name,
-                required=False,widget=forms.RadioSelect(choices=(('','All'),('1','True'),('0','False'))),default='A')}
+                required=False,widget=forms.RadioSelect(choices=(('','All'),('1','True'),('0','False'))),initial='A')}
 
 FilterControl.register(lambda m: isinstance(m,models.BooleanField),BooleanFilterControl)
 

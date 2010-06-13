@@ -16,6 +16,7 @@ TODO: look into group bys, try an example
 TODO: create an intuitive filter system for non-queryset based reports
 TODO: add a "today","this week","this month" hot link to the DateTimeFilterControl, maybe let it parse "today" as an ongoing 
 today field.. so like ?date_joined__lte=today or something
+TODO: add fine-grained permissions per report
 
 Long Term:
 TODO: build xml file for exporting permissions to Google SDC for secure google spreadsheet importing

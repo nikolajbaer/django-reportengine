@@ -2,17 +2,21 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.core.paginator import Paginator
 from django.contrib.admin.views.main import ALL_VAR,ORDER_VAR, PAGE_VAR
+from django.contrib.admin.views.decorators import staff_member_required
 import reportengine
 from urllib import urlencode
 
 # TODO add calendar view for date-ranged reports
 
 # TODO Maybe use a class based view? how do i make it easy to build SQLReports?
+@staff_member_required
 def report_list(request):
     r = reportengine.all_reports()
     return render_to_response('reportengine/list.html', {'reports': r}, 
                               context_instance=RequestContext(request))
 
+# TODO assign appropriate permissions. Some reports might need to be accessible via OAuth or some other mechanism
+@staff_member_required
 def view_report(request, slug, output=None):
     report = reportengine.get_report(slug)()
     params=dict(request.REQUEST)
@@ -58,6 +62,7 @@ def view_report(request, slug, output=None):
     if not outputformat:
         outputformat = report.output_formats[0] 
 
+    # Fill out the paginator if we have specified a page length
     paginator=None
     cl=None
     if per_page and not outputformat.no_paging:

@@ -2,7 +2,8 @@ import reportengine
 from django.contrib.auth.models import User
 
 class UserReport(reportengine.ModelReport):  
-    verbose_name="User Report"
+    verbose_name = "User Report"
+    description = "Listing of all users in the system"
     labels = ('username','is_active','email','first_name','last_name')
     list_filter=['is_active']
     model=User

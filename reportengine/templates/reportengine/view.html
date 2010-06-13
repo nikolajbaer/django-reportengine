@@ -20,8 +20,16 @@
   <div id="content-main">
     {% block object-tools %}{% endblock %}
 
+    {% block description %}
+    {% if report.description %}
+    <h3>Description</h3>
+    <div id="description">{{ report.description }}</div>
+    {% endif %}
+    {% endblock %}
+
     {% block filters %}
     {% if filter_form.fields %}
+    <h3>Filter</h3>
     <div id="filters">
         <form>
         {{ filter_form }}
@@ -31,6 +39,14 @@
     {% endif %}
     {% endblock %}
 
+    {% block alternate-formats %}
+    <h3>Alterante Formats</h3>
+    <div>
+        <i>Not Yet Implemented</i> 
+    </div>
+    {% endblock %}
+
+<h3>Data</h3>
  <table>
     <thead>
         <tr>

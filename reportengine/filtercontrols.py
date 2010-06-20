@@ -43,7 +43,7 @@ class DateTimeFilterControl(FilterControl):
         ln=self.label or self.field_name 
         start=forms.CharField(label=_("%s From")%ln,required=False,widget=forms.DateTimeInput())
         end=forms.CharField(label=_("%s To")%ln,required=False,widget=forms.DateTimeInput())
-        return {"%s__gte"%self.field_name:start,"%s__lte"%self.field_name:end}
+        return {"%s__gte"%self.field_name:start,"%s__lt"%self.field_name:end}
 
 FilterControl.register(lambda m: isinstance(m,models.DateTimeField),DateTimeFilterControl,"datetime")
 

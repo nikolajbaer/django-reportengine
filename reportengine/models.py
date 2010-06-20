@@ -4,6 +4,8 @@ HELP_TEXT="""Raw SQL to run. Follows standard python string substitution (e.g. %
 
 # TODO figure out how to make this read-only
 class SQLReport(models.Model):
-    sql=models.TextField(help_text=HELP_TEXT)
+    row_sql=models.TextField(help_text=HELP_TEXT)
+    aggregate_sql=models.TextField()
 
     # TODO add parameters to this that make it useful
+

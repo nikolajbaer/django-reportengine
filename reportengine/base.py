@@ -35,7 +35,8 @@ class Report(object):
     # then i can auto embed the charts at the top of the report based upon that data..
 
     def get_filter_form(self,request):
-        return forms.Form(request.REQUEST) 
+        form = forms.Form(data=request.REQUEST)
+        return form
 
     # CONSIDER maybe an "update rows"?
     # CONSIDER should paging be dealt with here to more intelligently handle aggregates?

@@ -22,7 +22,7 @@ class AdminOutputFormat(OutputFormat):
                               context_instance=RequestContext(request))
 
 class CSVOutputFormat(OutputFormat):
-    verbose_name="CSV (comma seperated value)"
+    verbose_name="CSV (comma separated value)"
     slug="csv"
     no_paging=True
 

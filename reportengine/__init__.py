@@ -1,6 +1,6 @@
 '''Duplicated from django-reporting by vitalik, but with my own twist -nb '''
 import imp
-from base import Report,ModelReport,QuerySetReport,SQLReport
+from base import Report,ModelReport,QuerySetReport,SQLReport,DateSQLReport
 
 # TODO  make this seperate from vitalik's registry methods
 _registry = {}

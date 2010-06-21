@@ -1,7 +1,7 @@
 import reportengine
 from django.contrib.auth.models import User
 from reportengine.filtercontrols import StartsWithFilterControl
-from outputformats import *
+from reportengine.outputformats import *
 
 class UserReport(reportengine.ModelReport):  
     """An example of a model report"""
@@ -51,17 +51,21 @@ class AppsReport(reportengine.Report):
  
 reportengine.register(AppsReport)
 
-class AdminActivityReport(reportengine.SQLReport):
+class AdminActivityReport(reportengine.DateSQLReport):
     row_sql="""select username,user_id,count(*),min(action_time),max(action_time) 
             from django_admin_log 
             inner join auth_user on auth_user.id = django_admin_log.user_id 
             where is_staff = 1
+            and action_time >= '%(date__gte)s'
+            and action_time < '%(date__lt)s'
             group by user_id;
     """
     aggregate_sql="""select avg(count) as average,max(count) as max,min(count) as min
             from (
                 select count(user_id) as count 
-                    from django_admin_log 
+                    from django_admin_log
+                    where action_time >= '%(date__gte)s'
+                    and action_time < '%(date__lt)s'
                     group by user_id
             )"""
     # TODO adding parameters to the sql report is.. hard.

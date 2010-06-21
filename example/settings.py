@@ -49,4 +49,5 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     'reportengine',
+    'example_reports',
 )

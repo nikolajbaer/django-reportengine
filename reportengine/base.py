@@ -7,6 +7,7 @@ from django.db.models.fields.related import RelatedField
 from django.db.models.fields import FieldDoesNotExist
 from filtercontrols import *
 from outputformats import *
+import datetime
 
 # Pulled from vitalik's Django-reporting
 def get_model_field(model, name):
@@ -24,6 +25,8 @@ def get_lookup_field(model, original, lookup):
 
 class Report(object):
     verbose_name="Abstract Report"
+    namespace = "Default"
+    slug ="base"
     labels = None
     per_page=100
     can_show_all=True
@@ -125,5 +128,13 @@ class SQLReport(Report):
 
         return rows,agg
     
-# TODO build AnnotatedReport that deals with .annotate functions in ORM
+class DateSQLReport(SQLReport):
+    aggregate_sql=None
+    query_params=[("date","Date","datetime")]
+    date_field="date"
+    default_mask={
+        "date__gte":lambda: (datetime.datetime.today() -datetime.timedelta(days=30)).strftime("%Y-%m-%d"),
+        "date__lt":lambda: (datetime.datetime.today() + datetime.timedelta(days=1)).strftime("%Y-%m-%d"),
+    }
 
+# TODO build AnnotatedReport that deals with .annotate functions in ORM

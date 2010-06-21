@@ -30,9 +30,18 @@ class Report(object):
     output_formats=[AdminOutputFormat(),CSVOutputFormat()]
     allow_unspecified_filters = False
     date_field = None  # if specified will lookup for this date field. .this is currently limited to queryset based lookups
+    default_mask = {}  # a dict of filter default values. Can be callable
 
     # TODO add charts = [ {'name','type e.g. bar','data':(0,1,3) cols in table}]
     # then i can auto embed the charts at the top of the report based upon that data..
+
+    def get_default_mask(self):
+        """Builds default mask. The filter is merged with this to create the filter for the report. Items can be callable and will be resolved when called here (which should be at view time)."""
+        m={}
+        for k in self.default_mask.keys():
+            v=self.default_mask[k]
+            m[k] =  callable(v) and v() or v
+        return m 
 
     def get_filter_form(self,request):
         form = forms.Form(data=request.REQUEST)

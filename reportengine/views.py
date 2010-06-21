@@ -55,8 +55,13 @@ def view_report(request, namespace, slug, output=None):
         if filters[k] == '':
             del filters[k]
 
+    # Merge filters with default mask
+    mask = report.get_default_mask()
+    mask.update(filters) 
+    
+
     # pull the rows and aggregates
-    rows,aggregates = report.get_rows(filters,order_by=order_by)
+    rows,aggregates = report.get_rows(mask,order_by=order_by)
 
     # Determine output format, as it can squash paging if it wants
     outputformat=None

@@ -1,4 +1,4 @@
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response,redirect
 from django.template.context import RequestContext
 from django.core.paginator import Paginator
 from django.contrib.admin.views.main import ALL_VAR,ORDER_VAR, PAGE_VAR
@@ -7,13 +7,14 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 import reportengine
 from urllib import urlencode
-import datetime
+import datetime,calendar
 
 # TODO add calendar view for date-ranged reports
 
 # TODO Maybe use a class based view? how do i make it easy to build SQLReports?
 @staff_member_required
 def report_list(request):
+    # TODO make sure to constrain based upon permissions
     r = reportengine.all_reports()
     return render_to_response('reportengine/list.html', {'reports': r}, 
                               context_instance=RequestContext(request))
@@ -117,17 +118,46 @@ def view_report(request, namespace, slug, output=None):
 
 @staff_member_required
 def current_redirect(request, daterange, namespace, slug, output=None):
+    days={"day":1,"week":7,"month":30,"year":365}
+    d2=datetime.datetime.now()
+    d1=d2 - datetime.timedelta(days=days[daterange])
+    return redirect_report_on_date(request,d1,d2,namespace,slug,output)
+
+@staff_member_required
+def day_redirect(request, year, month, day, namespace, slug, output=None):
+    year,month,day=int(year),int(month),int(day)
+    d1=datetime.datetime(year=year,month=month,day=day)
+    d2=d1 + datetime.timedelta(hours=24)
+    return redirect_report_on_date(request,d1,d2,namespace,slug,output)
+
+def redirect_report_on_date(request,start_day,end_day,namespace,slug,output=None):
+    """Utility that allows for a redirect of a report based upon the date range to the appropriate filter"""
     report=reportengine.get_report(namespace,slug) 
     # TODO make month and year more intelligent per calendar
-    days={"day":1,"week":7,"month":30,"year":365}
     params = dict(request.REQUEST)
     if report.date_field:
-        d2=datetime.datetime.now()
-        d1=d2 - datetime.timedelta(days=days[daterange])
         # TODO this only works with model fields, needs to be more generic
-        dates = {"%s__gte"%report.date_field:d1,"%s__lte"%report.date_field:d2}
+        dates = {"%s__gte"%report.date_field:start_day,"%s__lt"%report.date_field:end_day}
         params.update(dates)
     if output:
         return HttpResponseRedirect("%s?%s"%(reverse("reports-view-format",args=[namespace,slug,output]),urlencode(params)))
     return HttpResponseRedirect("%s?%s"%(reverse("reports-view",args=[namespace,slug]),urlencode(params)))
+
+@staff_member_required
+def calendar_current_redirect(request):
+    d=datetime.datetime.today()
+    return redirect("reports-calendar",year=d.year,month=d.month)
+
+@staff_member_required
+def calendar_view(request, year, month):
+    # TODO make sure to constrain based upon permissions
+    # TODO find all date_field accessible reports
+    reports=[r[1] for r in reportengine.all_reports() if r[1].date_field]
+    y,m=int(year),int(month)
+    date=datetime.datetime(year=int(year),month=int(month),day=1)
+    cal=calendar.monthcalendar(y,m)
+    # TODO possibly pull in date based aggregates?
+    cx={"reports":reports,"date":date,"calendar":cal}
+    return render_to_response("reportengine/calendar.html",cx,
+                              context_instance=RequestContext(request))
 

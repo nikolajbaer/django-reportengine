@@ -54,7 +54,14 @@ class Report(object):
     # CONSIDER should paging be dealt with here to more intelligently handle aggregates?
     def get_rows(self,filters={},order_by=None):
         """takes in parameters and pumps out an iterable of iterables for rows/cols, an list of tuples with (name/value) for the aggregates"""
-        return [],(('total',0),)
+        raise NotImplementedError("Subclass should return [],(('total',0),)")
+
+
+    # CONSIDER do this by day or by month? month seems most efficient in terms of optimizing queries
+    def get_monthly_aggregates(self,year,month):
+        """Called when assembling a calendar view of reports. This will be queried for every day, so should be quick"""
+        # CONSIDER worry about timezone? or just assume Django has this covered?
+        raise NotImplementedError("Still an idea in the works")
 
 class QuerySetReport(Report):
     # TODO make labels more addressable. now fixed to fields in model. what happens with relations?

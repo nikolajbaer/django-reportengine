@@ -1,0 +1,15 @@
+{% extends "reportengine/calendar.html" %}
+
+{% block calendar_breadcrumb %}{{ date|date:"d M Y" }}{% endblock %}
+
+{% block calendarcontent %}
+    <h2>Reports for {{ date|date:"d M Y" }}</h2>
+
+    <ul>
+    {% for r in reports %}
+    <li><a href="{% url reports-date-range date.year date.month date.day r.namespace r.slug %}">{{ r.verbose_name }}</a></li>
+    {% endfor %}
+    </ul>
+
+{% endblock %}
+

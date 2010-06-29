@@ -22,6 +22,8 @@ urlpatterns = patterns('reportengine.views',
     # Show latest calendar of all date accessible reports 
     url('^calendar/$', 'calendar_current_redirect', name='reports-calendar-current'),
     # Show specific month's calendar of reports
-    url('^calendar/(?P<year>\d+)/(?P<month>\d+)/$', 'calendar_view', name='reports-calendar'),
+    url('^calendar/(?P<year>\d+)/(?P<month>\d+)/$', 'calendar_month_view', name='reports-calendar-month'),
+    # Show specifi day's calendar of reports
+    url('^calendar/(?P<year>\d+)/(?P<month>\d+)/(?P<day>\d+)/$', 'calendar_day_view', name='reports-calendar-day'),
 
 )

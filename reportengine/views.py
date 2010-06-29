@@ -9,7 +9,10 @@ import reportengine
 from urllib import urlencode
 import datetime,calendar
 
-# TODO add calendar view for date-ranged reports
+def next_month(d):
+    """helper to get next month"""
+    return datetime.datetime(year=d.month<12 and d.year or d.year +1,month=d.month<12 and d.month+1 or 1,day=1)
+
 
 # TODO Maybe use a class based view? how do i make it easy to build SQLReports?
 @staff_member_required
@@ -118,6 +121,7 @@ def view_report(request, namespace, slug, output=None):
 
 @staff_member_required
 def current_redirect(request, daterange, namespace, slug, output=None):
+    # TODO make month and year more intelligent per calendar
     days={"day":1,"week":7,"month":30,"year":365}
     d2=datetime.datetime.now()
     d1=d2 - datetime.timedelta(days=days[daterange])
@@ -133,7 +137,6 @@ def day_redirect(request, year, month, day, namespace, slug, output=None):
 def redirect_report_on_date(request,start_day,end_day,namespace,slug,output=None):
     """Utility that allows for a redirect of a report based upon the date range to the appropriate filter"""
     report=reportengine.get_report(namespace,slug) 
-    # TODO make month and year more intelligent per calendar
     params = dict(request.REQUEST)
     if report.date_field:
         # TODO this only works with model fields, needs to be more generic
@@ -146,18 +149,33 @@ def redirect_report_on_date(request,start_day,end_day,namespace,slug,output=None
 @staff_member_required
 def calendar_current_redirect(request):
     d=datetime.datetime.today()
-    return redirect("reports-calendar",year=d.year,month=d.month)
+    return redirect("reports-calendar-month",year=d.year,month=d.month)
 
 @staff_member_required
-def calendar_view(request, year, month):
+def calendar_month_view(request, year, month):
     # TODO make sure to constrain based upon permissions
     # TODO find all date_field accessible reports
+    year,month=int(year),int(month)
     reports=[r[1] for r in reportengine.all_reports() if r[1].date_field]
-    y,m=int(year),int(month)
-    date=datetime.datetime(year=int(year),month=int(month),day=1)
-    cal=calendar.monthcalendar(y,m)
+    date=datetime.datetime(year=year,month=month,day=1)
+    prev_month=date-datetime.timedelta(days=1)
+    nxt_month=next_month(date) 
+    cal=calendar.monthcalendar(year,month)
+    # TODO possibly pull in date based aggregates?
+    cx={"reports":reports,"date":date,"calendar":cal,"prev":prev_month,"next":nxt_month}
+    return render_to_response("reportengine/calendar_month.html",cx,
+                              context_instance=RequestContext(request))
+
+@staff_member_required
+def calendar_day_view(request, year, month,day):
+    # TODO make sure to constrain based upon permissions
+    # TODO find all date_field accessible reports
+    year,month,day=int(year),int(month),int(day)
+    reports=[r[1] for r in reportengine.all_reports() if r[1].date_field]
+    date=datetime.datetime(year=year,month=month,day=day)
+    cal=calendar.monthcalendar(year,month)
     # TODO possibly pull in date based aggregates?
     cx={"reports":reports,"date":date,"calendar":cal}
-    return render_to_response("reportengine/calendar.html",cx,
+    return render_to_response("reportengine/calendar_day.html",cx,
                               context_instance=RequestContext(request))
 

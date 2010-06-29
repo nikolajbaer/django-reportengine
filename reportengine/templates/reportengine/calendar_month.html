@@ -1,0 +1,39 @@
+{% extends "reportengine/calendar.html" %}
+
+{% block calendar_breadcrumb %}{{ date|date:"M Y" }}{% endblock %}
+
+{% block calendarcontent %}
+    <h2>Reports for {{ date|date:"M Y" }}</h2>
+
+    <a href="{% url reports-calendar-current %}">current month</a>
+    <!-- TODO: make this localized -->
+    <table>
+        <tr>
+            <td><a href="{% url reports-calendar-month prev.year prev.month %}">&laquo;</a></td>
+            <td colspan="5"></td>
+            <td><a href="{% url reports-calendar-month next.year next.month %}">&raquo;</a></td>
+        </tr>
+        <tr>
+            <td>M</td>
+            <td>T</td>
+            <td>W</td>
+            <td>R</td>
+            <td>F</td>
+            <td>S</td>
+            <td>N</td>
+        </tr>
+        {% for week in calendar %}
+        <tr>
+        {% for day in week %}
+        <td>
+            {% if day %}
+                <div class="day">
+                   <a href="{% url reports-calendar-day date.year date.month date.day %}">{{ day }}</a>
+                </div>
+            {% endif %}
+        </td>
+        {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

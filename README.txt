@@ -19,7 +19,6 @@ Take a look at the sample project and reports in the example folder. To run it y
 
 TODO: build SQLReport that is based on instances configured in backend
 TODO: add manage.py command that generates specified reports and puts them in a certain spot
-TODO: add calendar view for date ranged reports
 TODO: add table row sorting
 TODO: figure out per page aggregates (right now that is not accessible in get_rows)
 TODO: maybe allow fields in queryset report to be callable on the model?
@@ -27,6 +26,8 @@ TODO: look into group bys, try an example
 TODO: create an intuitive filter system for non-queryset based reports
 TODO: make today type redirects and add date_field specifier (almost done)
 TODO: add fine-grained permissions per report
+TODO: add template tag for embeddable reports
+TODO: add per day (or month) aggregate date_field capabilities
 
 === Long Term ===
 

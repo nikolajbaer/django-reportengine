@@ -28,6 +28,7 @@ TODO: make today type redirects and add date_field specifier (almost done)
 TODO: add fine-grained permissions per report
 TODO: add template tag for embeddable reports
 TODO: add per day (or month) aggregate date_field capabilities
+TODO: setup a mechanism to have an "offline" report. You click to generate the report, it gets queued, and a queue processor hits it. That way multiple requests for the same report are handled outside of the actual apache processes
 
 === Long Term ===
 

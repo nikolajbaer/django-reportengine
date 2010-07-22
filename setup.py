@@ -26,7 +26,7 @@ setup(name='django-reportengine',
       maintainer_email = 'nikolaj@cukerinteractive.com',
       url='http://github.com/cuker/django-reportengine',
       license='MIT License',
-      #packages=find_packages(exclude=['ez_setup', 'reportengine', 'tests']),
+      packages=['reportengine'],
       zip_safe=False,
       install_requires=[
       ],

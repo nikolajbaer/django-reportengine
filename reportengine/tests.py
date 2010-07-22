@@ -1,23 +1,47 @@
 """
-This file demonstrates two different styles of tests (one doctest and one
-unittest). These will both pass when you run "manage.py test".
-
-Replace these with more appropriate tests for your application.
+Report Engine Tests.
 """
-
+from base import Report
+from filtercontrols import FilterControl
 from django.test import TestCase
+from django import forms
+import reportengine
 
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
+class BasicTestReport(Report):
+    """Test Report. set the rows an aggregate to test"""
+    slug="test"        
+    namespace="testing"
+    verbose_name="Basic Test Report"
+
+    def __init__(self,
+                    rows=[ [1,2,3] ],
+                    labels=["col1","col2","col3"],
+                    aggregate = (('total',1),),
+                    filterform = forms.Form() ):
+        self.rows=rows
+        self.labels=labels
+        self.aggregate=aggregate
+        self.filterform=filterform
+
+    def get_rows(self,filters={},order_by=None):
+        return self.rows,self.aggregate
+
+    def get_filter_form(self,request):
+        return self.filterform
+
+class BasicReportTest(TestCase):
+    def test_report_register(self):
         """
-        Tests that 1 + 1 always equals 2.
+        Tests registering a report, and verifies report is now accessible
         """
-        self.failUnlessEqual(1 + 1, 2)
+        r=BasicTestReport()
+        reportengine.register(r)
+        assert(reportengine.get_report("testing","test") == r)
+        found=False
+        for rep in reportengine.all_reports():
+            if rep[0] == (r.namespace,r.slug):
+                assert(rep[1] == r)
+                found=True
+        assert(found)
 
-__test__ = {"doctest": """
-Another way to test that 1 + 1 is equal to 2.
-
->>> 1 + 1 == 2
-True
-"""}
 

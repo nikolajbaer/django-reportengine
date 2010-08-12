@@ -120,12 +120,12 @@ class SQLReport(Report):
         from django.db import connection
         cursor = connection.cursor()
         if self.row_sql:
-            cursor.execute(self.row_sql%filters) 
+            cursor.execute(self.row_sql,filters) 
             rows=cursor.fetchall()
         else: rows=[]
 
         if self.aggregate_sql:
-            cursor.execute(self.aggregate_sql%filters)
+            cursor.execute(self.aggregate_sql,filters)
             result=cursor.fetchone() # only fetch first row
         
             agg=[]

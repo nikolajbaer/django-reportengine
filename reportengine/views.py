@@ -18,8 +18,9 @@ def next_month(d):
 @staff_member_required
 def report_list(request):
     # TODO make sure to constrain based upon permissions
-    r = reportengine.all_reports()
-    return render_to_response('reportengine/list.html', {'reports': r}, 
+    reports = [{'namespace': r.namespace, 'slug': r.slug, 'verbose_name': r.verbose_name} \
+            for s, r in reportengine.all_reports()]
+    return render_to_response('reportengine/list.html', {'reports': reports},
                               context_instance=RequestContext(request))
 
 # TODO build date_field redirects.. so view is at /current/<day|week|month|year>/<slug>/<format>/ and redirects
@@ -61,8 +62,8 @@ def view_report(request, namespace, slug, output=None):
 
     # Merge filters with default mask
     mask = report.get_default_mask()
-    mask.update(filters) 
-    
+    mask.update(filters)
+
 
     # pull the rows and aggregates
     rows,aggregates = report.get_rows(mask,order_by=order_by)
@@ -74,7 +75,7 @@ def view_report(request, namespace, slug, output=None):
             if of.slug == output:
                 outputformat=of
     if not outputformat:
-        outputformat = report.output_formats[0] 
+        outputformat = report.output_formats[0]
 
     # Fill out the paginator if we have specified a page length
     paginator=None
@@ -107,7 +108,7 @@ def view_report(request, namespace, slug, output=None):
         cl=MiniChangeList(paginator,page,per_page,cl_params)
 
 
-    data = {'report': report, 
+    data = {'report': report,
             'title':report.verbose_name,
             'rows':rows,
             'filter_form':filter_form,
@@ -136,7 +137,7 @@ def day_redirect(request, year, month, day, namespace, slug, output=None):
 
 def redirect_report_on_date(request,start_day,end_day,namespace,slug,output=None):
     """Utility that allows for a redirect of a report based upon the date range to the appropriate filter"""
-    report=reportengine.get_report(namespace,slug) 
+    report=reportengine.get_report(namespace,slug)
     params = dict(request.REQUEST)
     if report.date_field:
         # TODO this only works with model fields, needs to be more generic
@@ -159,7 +160,7 @@ def calendar_month_view(request, year, month):
     reports=[r[1] for r in reportengine.all_reports() if r[1].date_field]
     date=datetime.datetime(year=year,month=month,day=1)
     prev_month=date-datetime.timedelta(days=1)
-    nxt_month=next_month(date) 
+    nxt_month=next_month(date)
     cal=calendar.monthcalendar(year,month)
     # TODO possibly pull in date based aggregates?
     cx={"reports":reports,"date":date,"calendar":cal,"prev":prev_month,"next":nxt_month}
@@ -178,4 +179,3 @@ def calendar_day_view(request, year, month,day):
     cx={"reports":reports,"date":date,"calendar":cal}
     return render_to_response("reportengine/calendar_day.html",cx,
                               context_instance=RequestContext(request))
-

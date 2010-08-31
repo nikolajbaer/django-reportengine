@@ -1,6 +1,7 @@
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.http import HttpResponse
+from django.utils.encoding import smart_unicode
 import csv
 from xml.etree import ElementTree as ET
 
@@ -10,7 +11,7 @@ class OutputFormat(object):
     no_paging=False
 
     def get_response(self,context,request):
-        raise Exception("Use a subclass of OutputFormat.")        
+        raise Exception("Use a subclass of OutputFormat.")
 
 class AdminOutputFormat(OutputFormat):
     verbose_name="Admin Report"
@@ -18,7 +19,7 @@ class AdminOutputFormat(OutputFormat):
 
     def get_response(self,context,request):
         context.update({"output_format":self})
-        return render_to_response('reportengine/report.html', context, 
+        return render_to_response('reportengine/report.html', context,
                               context_instance=RequestContext(request))
 
 class CSVOutputFormat(OutputFormat):
@@ -43,17 +44,17 @@ class CSVOutputFormat(OutputFormat):
                     quoting=self.quoting,
                     lineterminator=self.lineterminator)
         for a in context["aggregates"]:
-            w.writerow(a)
+            w.writerow([smart_unicode(x) for x in a])
         w.writerow( context["report"].labels)
         for r in context["rows"]:
-            w.writerow(r) 
+            w.writerow([smart_unicode(x) for x in r])
         return resp
 
 class XMLOutputFormat(OutputFormat):
     verbose_name="XML"
     slug="xml"
     no_paging=True
-    
+
     def __init__(self,root_tag="output",row_tag="entry",aggregate_tag="aggregate"):
         self.root_tag=root_tag
         self.row_tag=row_tag
@@ -66,9 +67,9 @@ class XMLOutputFormat(OutputFormat):
         root = ET.Element(self.root_tag) # CONSIDER maybe a nicer name or verbose name or something
         for a in context["aggregates"]:
             ae=ET.SubElement(root,self.aggregate_tag)
-            ae.set("name",a[0]) 
+            ae.set("name",a[0])
             ae.text=unicode(a[1])
-        rows=context["rows"] 
+        rows=context["rows"]
         labels=context["report"].labels
         for r in rows:
             e=ET.SubElement(root,self.row_tag)
@@ -78,4 +79,3 @@ class XMLOutputFormat(OutputFormat):
         tree=ET.ElementTree(root)
         tree.write(resp)
         return resp
-

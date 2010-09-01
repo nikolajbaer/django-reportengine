@@ -78,14 +78,14 @@ class XMLOutputFormat(OutputFormat):
         for a in context["aggregates"]:
             ae=ET.SubElement(root,self.aggregate_tag)
             ae.set("name",a[0])
-            ae.text=unicode(a[1])
+            ae.text=smart_unicode(a[1])
         rows=context["rows"]
         labels=context["report"].labels
         for r in rows:
             e=ET.SubElement(root,self.row_tag)
             for l in range(len(labels)):
                 e1=ET.SubElement(e,labels[l])
-                e1.text = r[l]
+                e1.text = smart_unicode(r[l])
         tree=ET.ElementTree(root)
         tree.write(output)
 

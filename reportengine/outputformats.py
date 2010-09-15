@@ -50,10 +50,10 @@ class CSVOutputFormat(OutputFormat):
                     quoting=self.quoting,
                     lineterminator=self.lineterminator)
         for a in context["aggregates"]:
-            w.writerow([smart_unicode(x) for x in a])
+            w.writerow([smart_unicode(x).encode('utf8') for x in a])
         w.writerow( context["report"].labels)
         for r in context["rows"]:
-            w.writerow([smart_unicode(x) for x in r])
+            w.writerow([smart_unicode(x).encode('utf8') for x in r])
         return output
 
     def get_response(self,context,request):

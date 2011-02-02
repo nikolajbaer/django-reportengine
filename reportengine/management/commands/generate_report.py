@@ -120,4 +120,3 @@ class Command(BaseCommand):
         outputformat.generate_output(context, output)
         output.close()
 
-        sys.exit(0)

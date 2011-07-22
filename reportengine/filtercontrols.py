@@ -59,3 +59,17 @@ class StartsWithFilterControl(FilterControl):
     def get_fields(self):
         return {"%s__startswith"%self.field_name:forms.CharField(label=_("%s Starts With")%(self.label or self.field_name),
                 required=False)}
+
+class ChoiceFilterControl(FilterControl):
+    def __init__(self, *args, **kwargs):
+        self.choices = kwargs.pop('choices', [])
+        self.initial = kwargs.pop('initial', None)
+        super(ChoiceFilterControl, self).__init__(*args, **kwargs)
+
+    def get_fields(self):
+        return {self.field_name: forms.ChoiceField(
+            choices=self.choices,
+            label=self.label or self.field_name,
+            required=False,
+            initial=self.initial,
+            )}

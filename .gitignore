@@ -2,3 +2,8 @@
 *.pye
 *.egg-info
 build
+bin
+*.db
+include
+lib
+.Python

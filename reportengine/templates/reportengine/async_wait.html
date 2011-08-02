@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+
+{# TODO note that meta refreshes are deprecated.. but is there a nice clean way to do this otherwise? #}
+{% block extrahead %}
+<meta http-equiv="refresh" content="5" />
+{% endblock %}
+
+{% block content %}
+<h2>Please wait while your report is generated...</h2>
+{% endblock %}
+
+

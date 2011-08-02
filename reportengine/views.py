@@ -4,10 +4,11 @@ from django.core.paginator import Paginator
 from django.contrib.admin.views.main import ALL_VAR,ORDER_VAR, PAGE_VAR
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect,HttpResponse
 import reportengine
+from reportengine.models import ReportRequest
 from urllib import urlencode
-import datetime,calendar
+import datetime,calendar,hashlib
 
 def next_month(d):
     """helper to get next month"""
@@ -179,3 +180,51 @@ def calendar_day_view(request, year, month,day):
     cx={"reports":reports,"date":date,"calendar":cal}
     return render_to_response("reportengine/calendar_day.html",cx,
                               context_instance=RequestContext(request))
+
+def async_report(request, namespace, slug, output=None):
+    from tasks import async_report
+    # TODO build report via celery task 
+    # CONSIDER this 
+    # Request is stored as model object, only accessible by the requester via sesh token (offloads perms responsiblities)
+    #    
+    #
+    # If they have a report request token in their session,
+    tk = request.session.get("report_request",None)
+    #    try to pull up the report request and show it to them
+    #       if it exists, show them the reportrequest and clear
+    #       else clear the report request and continue (what about caching it for a while?)
+    #           ** When clearing, mark when it was viewed, and maybe the IP address 
+    if tk and tk["namespace"] == namespace \
+          and tk["slug"] == slug \
+          and tk["params"] == request.GET.urlencode():
+        try:
+            rr = ReportRequest.objects.get(token=tk["token"])
+            resp = HttpResponse(rr.content)  
+            if rr.mimetype:
+                resp["Content-Type"] = rr.mimetype
+            rr.viewed=datetime.datetime.now() 
+            rr.save()
+            del request.session["report_request"]
+            return resp
+        except ReportRequest.DoesNotExist:
+            rr = None 
+        del request.session["report_request"]
+
+    # Otherwise we have a new report request
+    # create a ReportRequest object, and store the token in their session
+    # fire off task with requested report 
+    # return them a wait page with meta refresh
+    token = hashlib.md5(" ".join([str(datetime.datetime.now()),request.session.session_key,namespace,slug,request.GET.urlencode()])).hexdigest()
+    rr = ReportRequest(token=token,namespace=namespace,slug=slug,params=request.GET.urlencode())
+    rr.save()
+
+    # enqueue celery task to build relevant report
+    cx = {"reportrequest":rr}
+
+    # is this necessary? maybe for debug?
+    cx["task"] = async_report.delay(rr.token)
+
+    request.session["report_request"] = dict(token=token,namespace=namespace,slug=slug,params=request.GET.urlencode(),task=cx["task"])
+    return render_to_response("reportengine/async_wait.html",cx,context_instance=RequestContext(request))
+
+

@@ -57,13 +57,16 @@ def async_report(token):
  
     ## Get our output format, setting a default if one wasn't set or isn't valid for this report
     outputformat = None
-    if output:
+    oformat = kwargs.get("format",None)
+    if oformat:
         for format in report.output_formats:
-            if format.slug == kwargs.get('format',None):
+            if format.slug == oformat:
                 outputformat = format
+
     if not outputformat:
-        ## By default, [0] is AdminOutputFormat, so grab the last one instead
-        outputformat = report.output_formats[-1]
+        outputformat = report.output_formats[0]
+    ## By default, [0] is AdminOutputFormat, so grab the last one instead
+    #outputformat = report.output_formats[-1]
     
     context = {
         'report': report,
@@ -77,7 +80,7 @@ def async_report(token):
         'urlparams': repreq.params
         }
     
-    outputformat.generate_output(context, output)
+    outputformat.generate_response(context, output)
     #output.close()
    
     repreq.content = output.getvalue() 

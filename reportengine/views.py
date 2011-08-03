@@ -26,6 +26,7 @@ def report_list(request):
 # TODO build date_field redirects.. so view is at /current/<day|week|month|year>/<slug>/<format>/ and redirects
 # to the appropriate date filter
 # TODO assign appropriate permissions. Some reports might need to be accessible via OAuth or some other mechanism
+# TODO generate report in separate method. views should be thin!
 @staff_member_required
 def view_report(request, namespace, slug, output=None):
     report = reportengine.get_report(namespace,slug)()

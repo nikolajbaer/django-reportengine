@@ -119,13 +119,14 @@ class SQLReport(Report):
         # TODO incorporate offset/limit somehow
         from django.db import connection
         cursor = connection.cursor()
+        # TODO named parameters don't work in SQLite3, so this doesn't hold up
         if self.row_sql:
-            cursor.execute(self.row_sql%filters) 
+            cursor.execute(self.row_sql,filters) 
             rows=cursor.fetchall()
         else: rows=[]
 
         if self.aggregate_sql:
-            cursor.execute(self.aggregate_sql%filters)
+            cursor.execute(self.aggregate_sql,filters)
             result=cursor.fetchone() # only fetch first row
         
             agg=[]

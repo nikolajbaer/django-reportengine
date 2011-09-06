@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.contrib.admin.views.main import ALL_VAR,ORDER_VAR, PAGE_VAR
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect,HttpResponse
 import reportengine
 from urllib import urlencode
 import datetime,calendar
@@ -107,18 +107,23 @@ def view_report(request, namespace, slug, output=None):
         cl_params=order_by and dict(params,order_by=order_by) or params
         cl=MiniChangeList(paginator,page,per_page,cl_params)
 
+    #data = {'report': report, 
+    #        'title':report.verbose_name,
+    #        'rows':rows,
+    #        'filter_form':filter_form,
+    #        "aggregates":aggregates,
+    #        "paginator":paginator,
+    #        "cl":cl,
+    #        "page":page,
+    #        "urlparams":urlencode(request.REQUEST)}
 
-    data = {'report': report, 
-            'title':report.verbose_name,
-            'rows':rows,
-            'filter_form':filter_form,
-            "aggregates":aggregates,
-            "paginator":paginator,
-            "cl":cl,
-            "page":page,
-            "urlparams":urlencode(request.REQUEST)}
-
-    return outputformat.get_response(data,request)
+    # TODO
+    data = report.get_datasets(filters=request.REQUEST)
+    result = outputformat.get_result(data,report,dict(request=request,cl=cl,page=page,paginator=paginator))
+    response = HttpResponse(result.content)
+    response["Content-Type"] = result.mimetype
+    return response
+    #return outputformat.get_response(data,request)
 
 @staff_member_required
 def current_redirect(request, daterange, namespace, slug, output=None):

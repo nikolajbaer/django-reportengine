@@ -52,10 +52,11 @@ class Report(object):
 
     # CONSIDER maybe an "update rows"?
     # CONSIDER should paging be dealt with here to more intelligently handle aggregates?
-    def get_rows(self,filters={},order_by=None):
+    def get_datasets(self,filters={},order_by=None):
         """takes in parameters and pumps out an iterable of iterables for rows/cols, an list of tuples with (name/value) for the aggregates"""
-        raise NotImplementedError("Subclass should return [],(('total',0),)")
-
+        # For legacy compaitiblity
+        return [LegacyDataset(self.get_rows(filters,order_by),filters=filters,order_by=order_by)]
+        #raise NotImplementedError("Subclass should return a list of Data Sets")
 
     # CONSIDER do this by day or by month? month seems most efficient in terms of optimizing queries
     def get_monthly_aggregates(self,year,month):
@@ -63,16 +64,29 @@ class Report(object):
         # CONSIDER worry about timezone? or just assume Django has this covered?
         raise NotImplementedError("Still an idea in the works")
 
+class Dataset(object):
+    def __init__(self,filters={},order_by=None,name=""):
+        self.filters=filters
+        self.order_by=order_by
+        self.name = "Abstract Dataset"
+        # TODO maybe call load here? lazy loading?
+
+    def get_aggregates(self):
+        raise NotImplementedError("Returns dictionary of aggregates")        
+
+    def get_rows(self,offset,limit):
+        raise NotImplementedError("Returns list of rows")
+
 class QuerySetReport(Report):
     # TODO make labels more addressable. now fixed to fields in model. what happens with relations?
     labels = None
     queryset = None
     list_filter = []
 
-    def get_filter_form(self,request):
+    def get_filter_form(self,filters):
         """Retrieves naive filter based upon list_filter and the queryset model fields.. will not follow __ relations i think"""
         # TODO iterate through list filter and create appropriate widget and prefill from request
-        form = forms.Form(data=request.REQUEST)
+        form = forms.Form(data=filters)
         for f in self.list_filter:
             # Allow specification of custom filter control, or specify field name (and label?)
             if isinstance(f,FilterControl):
@@ -135,7 +149,20 @@ class SQLReport(Report):
         else: agg=[]
 
         return rows,agg
-    
+
+class LegacyDataset(Dataset):
+    """For compatibility, wraps old rows method"""
+    def __init__(self,data,filters,order_by):
+        super(LegacyDataset,self).__init__(filters=filters,order_by=order_by) 
+        self.rows=data[0]
+        self.aggregates=data[1]
+
+    def get_data(self):
+        return self.rows
+
+    def get_aggregates(self):
+        return dict(self.aggregates)
+
 class DateSQLReport(SQLReport):
     aggregate_sql=None
     query_params=[("date","Date","datetime")]

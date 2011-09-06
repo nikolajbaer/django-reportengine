@@ -3,23 +3,61 @@ from django.template.context import RequestContext
 from django.http import HttpResponse
 import csv
 from xml.etree import ElementTree as ET
+from urllib import urlencode
+
+# TODO must be serializable! So we can do async and store somewhere
+class ReportResult(object):
+    """Report Result encapsulates the report data response. This should be following the render by an OutputFormat, and encodes the mimetype and some additional meta."""
+    def __init__(self,title,content,page=1,pages=None,perpage=None,meta={},mimetype="text/text"): 
+        self.title = title
+        self.content = content
+        self.mimetype = mimetype
+        self.meta = meta # catchall for stuff i didn't figure out
+        # CONSIDER should this be how paging works?
+        self.page = page
+        self.pages = pages
+        self.perpage = perpage
+
+class ReportResultHttpResponse(ReportResult):
+    def __init__(self,title,response):         
+        self.response=response
+        self.title=title
+        self.mimetype = response.get("Content-Type","text/text")
+        self.content = response.content
 
 class OutputFormat(object):
     verbose_name="Abstract Output Format"
     slug="output"
     no_paging=False
 
-    def get_response(self,context,request):
-        raise Exception("Use a subclass of OutputFormat.")        
+    def get_result(self,datasets):
+        raise NotImplementedError("Return Report Result in your subclass") 
+
+    #def get_response(self,context,request):
+    #    raise Exception("Use a subclass of OutputFormat.")        
 
 class AdminOutputFormat(OutputFormat):
     verbose_name="Admin Report"
     slug="admin"
 
-    def get_response(self,context,request):
-        context.update({"output_format":self})
-        return render_to_response('reportengine/report.html', context, 
-                              context_instance=RequestContext(request))
+    # extra is how we transfer over stuff like the request object to the items that can use it
+    def get_result(self,datasets,report,extra={}): 
+        # TODO make this support multiple data sets
+        data = {'report': report, 
+                'title':report.verbose_name,
+                'rows':datasets[0].get_data(),
+                'filter_form':report.get_filter_form(datasets[0].filters), # TODO Datasets.filters should support multiple filter forms in a formset!
+                "aggregates":datasets[0].get_aggregates(),
+                "paginator":extra["paginator"],  # TODO add paginator
+                "cl":extra["cl"], # TODO what in the heck is this?
+                "page":extra["page"], # TODO add page
+                "urlparams":urlencode(extra["request"].REQUEST)} # TODO how dow transfer this info over?
+
+        data.update({"output_format":self})
+        response = render_to_response('reportengine/report.html', data)
+        result = ReportResultHttpResponse(data["title"],response)
+        return result
+                                      #context_instance=RequestContext(request))
 
 class CSVOutputFormat(OutputFormat):
     verbose_name="CSV (comma separated value)"

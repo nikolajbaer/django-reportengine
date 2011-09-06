@@ -50,4 +50,11 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'reportengine',
     'example_reports',
+    'djcelery',
+    'djkombu',
 )
+
+
+ASYNC_REPORTS=True
+BROKER_TRANSPORT = "djkombu.transport.DatabaseTransport"
+

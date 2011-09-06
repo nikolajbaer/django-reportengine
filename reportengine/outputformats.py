@@ -1,7 +1,9 @@
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.http import HttpResponse
+from django.utils.encoding import smart_unicode
 import csv
+from cStringIO import StringIO
 from xml.etree import ElementTree as ET
 from urllib import urlencode
 
@@ -59,6 +61,8 @@ class AdminOutputFormat(OutputFormat):
         result = ReportResultHttpResponse(data["title"],response)
         return result
                                       #context_instance=RequestContext(request))
+    def generate_output(self, context, output):
+        raise NotImplemented("Not necessary for this output format")
 
 class CSVOutputFormat(OutputFormat):
     verbose_name="CSV (comma separated value)"
@@ -72,49 +76,55 @@ class CSVOutputFormat(OutputFormat):
         self.delimiter=delimiter
         self.lineterminator=lineterminator
 
-    def get_response(self,context,request):
-        resp = HttpResponse(mimetype='text/csv')
-        # CONSIDER maybe a "get_filename" from the report?
-        resp['Content-Disposition'] = 'attachment; filename=%s.csv'%context['report'].slug
-        w=csv.writer(resp,
+    def generate_output(self, context, output):
+        w=csv.writer(output,
                     delimiter=self.delimiter,
                     quotechar=self.quotechar,
                     quoting=self.quoting,
                     lineterminator=self.lineterminator)
         for a in context["aggregates"]:
-            w.writerow(a)
+            w.writerow([smart_unicode(x).encode('utf8') for x in a])
         w.writerow( context["report"].labels)
         for r in context["rows"]:
-            w.writerow(r) 
+            w.writerow([smart_unicode(x).encode('utf8') for x in r])
+        return output
+
+    def get_response(self,context,request):
+        resp = HttpResponse(mimetype='text/csv')
+        # CONSIDER maybe a "get_filename" from the report?
+        resp['Content-Disposition'] = 'attachment; filename=%s.csv'%context['report'].slug
+        self.generate_output(context, resp)
         return resp
 
 class XMLOutputFormat(OutputFormat):
     verbose_name="XML"
     slug="xml"
     no_paging=True
-    
+
     def __init__(self,root_tag="output",row_tag="entry",aggregate_tag="aggregate"):
         self.root_tag=root_tag
         self.row_tag=row_tag
         self.aggregate_tag=aggregate_tag
 
-    def get_response(self,context,request):
-        resp = HttpResponse(mimetype='text/xml')
-        # CONSIDER maybe a "get_filename" from the report?
-        resp['Content-Disposition'] = 'attachment; filename=%s.xml'%context['report'].slug
+    def generate_output(self, context, output):
         root = ET.Element(self.root_tag) # CONSIDER maybe a nicer name or verbose name or something
         for a in context["aggregates"]:
             ae=ET.SubElement(root,self.aggregate_tag)
-            ae.set("name",a[0]) 
-            ae.text=unicode(a[1])
-        rows=context["rows"] 
+            ae.set("name",a[0])
+            ae.text=smart_unicode(a[1])
+        rows=context["rows"]
         labels=context["report"].labels
         for r in rows:
             e=ET.SubElement(root,self.row_tag)
             for l in range(len(labels)):
                 e1=ET.SubElement(e,labels[l])
-                e1.text = r[l]
+                e1.text = smart_unicode(r[l])
         tree=ET.ElementTree(root)
-        tree.write(resp)
-        return resp
+        tree.write(output)
 
+    def get_response(self,context,request):
+        resp = HttpResponse(mimetype='text/xml')
+        # CONSIDER maybe a "get_filename" from the report?
+        resp['Content-Disposition'] = 'attachment; filename=%s.xml'%context['report'].slug
+        self.generate_output(context, resp)
+        return resp

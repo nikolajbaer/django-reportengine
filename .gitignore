@@ -4,3 +4,8 @@
 build
 example/django
 example/reportengine
+bin
+*.db
+include
+lib
+.Python

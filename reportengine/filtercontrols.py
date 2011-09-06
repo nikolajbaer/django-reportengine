@@ -14,11 +14,11 @@ class FilterControl(object):
     filter_controls=[]
     def __init__(self,field_name,label=None):
         self.field_name=field_name
-        self.label=label         
+        self.label=label
 
     def get_fields(self):
         return {self.field_name:forms.CharField(label=self.label or self.field_name,required=False)}
-    
+
     # Pulled from django.contrib.admin.filterspecs
     def register(cls, test, factory, datatype):
         cls.filter_controls.append((test, factory, datatype))
@@ -27,22 +27,22 @@ class FilterControl(object):
     def create_from_modelfield(cls, f, field_name, label=None):
         for test, factory, datatype in cls.filter_controls:
             if test(f):
-                return factory(field_name,label) 
+                return factory(field_name,label)
     create_from_modelfield = classmethod(create_from_modelfield)
 
     def create_from_datatype(cls, datatype, field_name, label=None):
         for test, factory, dt in cls.filter_controls:
             if dt == datatype:
-                return factory(field_name,label) 
+                return factory(field_name,label)
     create_from_datatype = classmethod(create_from_datatype)
 
 FilterControl.register(lambda m: isinstance(m,models.CharField),FilterControl,"char")
 
 class DateTimeFilterControl(FilterControl):
     def get_fields(self):
-        ln=self.label or self.field_name 
-        start=forms.CharField(label=_("%s From")%ln,required=False,widget=forms.DateTimeInput())
-        end=forms.CharField(label=_("%s To")%ln,required=False,widget=forms.DateTimeInput())
+        ln=self.label or self.field_name
+        start=forms.CharField(label=_("%s From")%ln,required=False,widget=forms.DateTimeInput(attrs={'class': 'vDateField'}))
+        end=forms.CharField(label=_("%s To")%ln,required=False,widget=forms.DateTimeInput(attrs={'class': 'vDateField'}))
         return {"%s__gte"%self.field_name:start,"%s__lt"%self.field_name:end}
 
 FilterControl.register(lambda m: isinstance(m,models.DateTimeField),DateTimeFilterControl,"datetime")
@@ -60,3 +60,16 @@ class StartsWithFilterControl(FilterControl):
         return {"%s__startswith"%self.field_name:forms.CharField(label=_("%s Starts With")%(self.label or self.field_name),
                 required=False)}
 
+class ChoiceFilterControl(FilterControl):
+    def __init__(self, *args, **kwargs):
+        self.choices = kwargs.pop('choices', [])
+        self.initial = kwargs.pop('initial', None)
+        super(ChoiceFilterControl, self).__init__(*args, **kwargs)
+
+    def get_fields(self):
+        return {self.field_name: forms.ChoiceField(
+            choices=self.choices,
+            label=self.label or self.field_name,
+            required=False,
+            initial=self.initial,
+            )}

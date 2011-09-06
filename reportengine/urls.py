@@ -1,12 +1,10 @@
 from django.conf.urls.defaults import *
+from django.conf import settings
 
 urlpatterns = patterns('reportengine.views',
     # Listing of reports
     url('^$', 'report_list', name='reports-list'),
-    # View report in first output style
-    url('^view/(?P<namespace>[-\w]+)/(?P<slug>[-\w]+)/$', 'view_report', name='reports-view'),
-    # view report in specified output format
-    url('^view/(?P<namespace>[-\w]+)/(?P<slug>[-\w]+)/(?P<output>[-\w]+)/$', 'view_report', name='reports-view-format'),
+
     # view report redirected to current date format (requires date_field argument)
     url('^current/(?P<daterange>(day|week|month|year))/(?P<namespace>[-\w]+)/(?P<slug>[-\w]+)/$', 
         'current_redirect', name='reports-current'),
@@ -27,3 +25,22 @@ urlpatterns = patterns('reportengine.views',
     url('^calendar/(?P<year>\d+)/(?P<month>\d+)/(?P<day>\d+)/$', 'calendar_day_view', name='reports-calendar-day'),
 
 )
+
+# Add async report view if we are doing async reports, otherwise go to sync report views
+# NOTE i am doing this here in case we need to re-org the urls for future HTML compat. (my meta refresh is deprecated)
+if hasattr(settings,"ASYNC_REPORTS") and settings.ASYNC_REPORTS:
+    urlpatterns += patterns('reportengine.views',
+        # TODO make this an option? to do async all the time?
+        url('^view/(?P<namespace>[-\w]+)/(?P<slug>[-\w]+)/$', 'async_report', name='reports-view'),
+        # view report in specified output format
+        url('^view/(?P<namespace>[-\w]+)/(?P<slug>[-\w]+)/(?P<output>[-\w]+)/$', 'async_report', name='reports-view-format'),
+    )    
+else:
+    urlpatterns += patterns('reportengine.views',
+        # View report in first output style
+        url('^view/(?P<namespace>[-\w]+)/(?P<slug>[-\w]+)/$', 'view_report', name='reports-view'),
+        # view report in specified output format
+        url('^view/(?P<namespace>[-\w]+)/(?P<slug>[-\w]+)/(?P<output>[-\w]+)/$', 'view_report', name='reports-view-format'),
+    )
+
+

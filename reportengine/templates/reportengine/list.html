@@ -12,7 +12,7 @@
 {% block breadcrumbs %}
 <div class="breadcrumbs">
      <a href="/admin/">{% trans "Home" %}</a> &rsaquo;
-     Reports 
+     Reports
 
 </div>
 {% endblock %}
@@ -22,7 +22,7 @@
 {% block content %}
   <div id="content-main">
     {% block object-tools %}{% endblock %}
-    
+
     <div id="changelist">
 
 		<H2>Reports</H2>
@@ -30,13 +30,15 @@
     <div>
         <a href="{% url reports-calendar-current %}">Calendar View</a>
     </div>
-      
-      <div id="changelist"
-			{% for slug, report in reports %}
-                {% ifchanged slug.0 %}<h3>{{ slug.0|title }}</h3>{% endifchanged %}
-				<a href="{% url reports-view slug.0 slug.1 %}">{{report.verbose_name}}</a>
-                <br/>
-			{% endfor %}
+
+      <div id="changelist">
+            {% regroup reports|dictsort:"namespace" by namespace as report_list %}
+            {% for namespace in report_list %}
+                <h3>{{ namespace.grouper|title }}</h3>
+                {% for report in namespace.list|dictsort:"verbose_name" %}
+                    <a href="{% url reports-view report.namespace report.slug %}">{{ report.verbose_name }}</a><br />
+                {% endfor %}
+            {% endfor %}
 	  </div>
     </div>
   </div>

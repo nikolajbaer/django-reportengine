@@ -2,7 +2,15 @@
 {% load adminmedia admin_list i18n %}
 
 {% block extrastyle %}
-  <link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/changelists.css" />
+    <link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/forms.css" />
+    <link rel="stylesheet" type="text/css" href="{% admin_media_prefix %}css/changelists.css" />
+{% endblock %}
+
+{% block extrahead %}
+    <script type="text/javascript" src="{% url admin:jsi18n %}"></script>
+    <script type="text/javascript" src="{% admin_media_prefix %}js/core.js"></script>
+    <script type="text/javascript" src="{% admin_media_prefix %}js/calendar.js"></script>
+    <script type="text/javascript" src="{% admin_media_prefix %}js/admin/DateTimeShortcuts.js"></script>
 {% endblock %}
 
 {% block bodyclass %}change-list{% endblock %}
@@ -11,7 +19,7 @@
 <div class="breadcrumbs">
      <a href="/admin/">{% trans "Home" %}</a> &rsaquo;
      <a href="{% url reports-list %}">Reports</a> &rsaquo;
-     {{report.verbose_name}} 
+     {{report.verbose_name}}
 </div>
 {% endblock %}
 
@@ -85,4 +93,3 @@
 
 </div>
 {% endblock %}
-

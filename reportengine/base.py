@@ -27,7 +27,7 @@ class Report(object):
     verbose_name="Abstract Report"
     namespace = "Default"
     slug ="base"
-    labels = None
+    labels = None # TODO this needs to be relevant to the Dataset
     per_page=100
     can_show_all=True
     output_formats=[AdminOutputFormat(),CSVOutputFormat()]
@@ -46,17 +46,20 @@ class Report(object):
             m[k] =  callable(v) and v() or v
         return m 
 
-    def get_filter_form(self,request):
-        form = forms.Form(data=request.REQUEST)
+    def get_filter_form(self,filters):
+        form = forms.Form(data=filters)
         return form
 
     # CONSIDER maybe an "update rows"?
     # CONSIDER should paging be dealt with here to more intelligently handle aggregates?
     def get_datasets(self,filters={},order_by=None):
-        """takes in parameters and pumps out an iterable of iterables for rows/cols, an list of tuples with (name/value) for the aggregates"""
+        """takes in parameters and pumps out an iterable of Dataset objects. Each Dataset has a table of values, and a set of aggregates."""
         # For legacy compaitiblity
-        return [LegacyDataset(self.get_rows(filters,order_by),filters=filters,order_by=order_by)]
-        #raise NotImplementedError("Subclass should return a list of Data Sets")
+        if hasattr(self,"get_rows"):
+            print self.get_rows(filters,order_by)
+            return [LegacyDataset(self.get_rows(filters,order_by),filters=filters,order_by=order_by)]
+        else:
+            raise NotImplementedError("Subclass should return a list of Data Sets")
 
     # CONSIDER do this by day or by month? month seems most efficient in terms of optimizing queries
     def get_monthly_aggregates(self,year,month):
@@ -119,8 +122,8 @@ class SQLReport(Report):
     aggregate_sql=None # sql statement that brings in aggregates. pulls from column name and value for first row only 
     query_params=[] # list of tuples, (name,label,datatype) where datatype is a mapping to a registerd filtercontrol
 
-    def get_filter_form(self,request):
-        form=forms.Form(data=request.REQUEST) 
+    def get_filter_form(self,filters):
+        form=forms.Form(data=filters) 
         for q in self.query_params:
             control = FilterControl.create_from_datatype(q[2],q[0],q[1])
             fields = control.get_fields()
@@ -151,7 +154,7 @@ class SQLReport(Report):
         return rows,agg
 
 class LegacyDataset(Dataset):
-    """For compatibility, wraps old rows method"""
+    """For compatibility, helps wrap old rows method"""
     def __init__(self,data,filters,order_by):
         super(LegacyDataset,self).__init__(filters=filters,order_by=order_by) 
         self.rows=data[0]

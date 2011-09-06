@@ -33,14 +33,14 @@ def view_report(request, namespace, slug, output=None):
 
     order_by=params.pop(ORDER_VAR,None)
 
-    page,per_page=0,report.per_page
+    page,per_page=0,False # TODO resolve report.per_page
     try:
         page=int(params.pop(PAGE_VAR,0))
     except ValueError:
         pass # ignore bogus page/per_page
 
     # Filters are served as forms from the report
-    filter_form=report.get_filter_form(request)
+    filter_form=report.get_filter_form(request.REQUEST)
     if filter_form.fields:
         if filter_form.is_valid():
             filters=filter_form.cleaned_data
@@ -63,10 +63,9 @@ def view_report(request, namespace, slug, output=None):
     # Merge filters with default mask
     mask = report.get_default_mask()
     mask.update(filters) 
-    
 
     # pull the rows and aggregates
-    rows,aggregates = report.get_rows(mask,order_by=order_by)
+    #rows,aggregates = report.get_rows(mask,order_by=order_by)
 
     # Determine output format, as it can squash paging if it wants
     outputformat=None
@@ -77,6 +76,7 @@ def view_report(request, namespace, slug, output=None):
     if not outputformat:
         outputformat = report.output_formats[0] 
 
+    # TODO update this for new paging scheme (which does nto exist)
     # Fill out the paginator if we have specified a page length
     paginator=None
     cl=None
@@ -118,7 +118,7 @@ def view_report(request, namespace, slug, output=None):
     #        "urlparams":urlencode(request.REQUEST)}
 
     # TODO
-    data = report.get_datasets(filters=request.REQUEST)
+    data = report.get_datasets(filters=mask)
     result = outputformat.get_result(data,report,dict(request=request,cl=cl,page=page,paginator=paginator))
     response = HttpResponse(result.content)
     response["Content-Type"] = result.mimetype

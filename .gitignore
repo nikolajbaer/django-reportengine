@@ -2,3 +2,5 @@
 *.pye
 *.egg-info
 build
+example/django
+example/reportengine

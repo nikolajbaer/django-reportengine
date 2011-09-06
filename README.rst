@@ -35,6 +35,10 @@ Things this does not address:
 
 1. Paging is not being handled (need to re-gen the entire report)
 
+   1. Currently the view kindof passes in a paginator object to the Admin report, which is the only one who "gets" paging, via the "extra" object. Also, each Dataset can contain paging, but do we do this independantly? Or should the overall report handle paging? One would think we should do both, no? (i.e. output format can get pages of data for what it needs, and it might do some separate level of paging if it wants to have graphs or whatever..)
+
+2. Extensions for hooking in charts via data. One would want to 'decorate' the datasets with display meta data that would indicate if it should be a chart. This is kindof crunchy as each output format may decide how best to do it. Maybe the Dataset could have a display hint .. e.g. "pie" or "line" or "bar"?
+ 
 Additional helpers:
 
 1. Reports can return a filter Form object that provides a form interface for creating the filter.
@@ -44,5 +48,12 @@ Example
 -------
 
 Take a look at the sample project and reports in the example folder. To run it you need to have Django 1.1.2 and reportengine on your PYTHONPATH.
+
+Change History
+--------------
+
+Dataset Refactor (9/2011):
+
+1. Changed reports to serve one or more Dataset objects. Output formats now return a ReportResult. The report get_rows should be compatible via the LegacyDataset object automatically, however get_filter_forms currently does not play nice with reports expecting the HttpRequest object. The core reports have been updated to deal with this appropriately.
 
 

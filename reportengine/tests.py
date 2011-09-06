@@ -26,7 +26,7 @@ class BasicTestReport(Report):
     def get_rows(self,filters={},order_by=None):
         return self.rows,self.aggregate
 
-    def get_filter_form(self,request):
+    def get_filter_form(self,filters):
         return self.filterform
 
 class BasicReportTest(TestCase):

@@ -30,6 +30,7 @@ class OutputFormat(object):
     slug="output"
     no_paging=False
 
+    # Should this have paging in it? Who should know about paging?
     def get_result(self,datasets):
         raise NotImplementedError("Return Report Result in your subclass") 
 
